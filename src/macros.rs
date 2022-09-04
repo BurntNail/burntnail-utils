@@ -1,5 +1,5 @@
 ///Provides any number of unit structs that implement a unit type
-/// 
+///
 ///Must pass in a `Sealed` trait for use in libraries, if you don't care use [`std::any::Any`] or [`std::drop::Drop`]
 #[macro_export]
 macro_rules! generic_enum {

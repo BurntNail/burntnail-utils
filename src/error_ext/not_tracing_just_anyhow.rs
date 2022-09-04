@@ -1,5 +1,5 @@
-use std::error::Error;
 use super::ErrorExt;
+use std::error::Error;
 
 impl<T> ErrorExt<T> for Result<T, Error> {
     fn warn(self) {

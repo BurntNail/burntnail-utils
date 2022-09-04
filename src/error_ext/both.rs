@@ -1,5 +1,5 @@
 use super::ErrorExt;
-use tracing::{warn, error};
+use tracing::{error, warn};
 
 impl<T> ErrorExt<T> for Result<T, anyhow::Error> {
     fn warn(self) {

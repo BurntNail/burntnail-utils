@@ -1,5 +1,5 @@
-use anyhow::Error;
 use super::ErrorExt;
+use anyhow::Error;
 
 impl<T> ErrorExt<T> for Result<T, Error> {
     fn warn(self) {

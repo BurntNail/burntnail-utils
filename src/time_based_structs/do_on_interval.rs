@@ -3,7 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crate::{crate_private::Sealed, generic_enum, either::Either};
+use crate::{crate_private::Sealed, either::Either, generic_enum};
 
 generic_enum!(Sealed, (DoOnIntervalMode -> "Trait for how `DoOnInterval` should update the timer") => (GiveUpdaters -> "Give updaters that update the timer when they are dropped"), (UpdateOnCheck -> "Update the timer when if we can do the action when we check"));
 
@@ -35,12 +35,12 @@ impl<MODE: DoOnIntervalMode> DoOnInterval<MODE> {
 
     ///Same as the normal `new` method, but will not perform an update straight away
     #[must_use]
-    pub fn new_dont_initial_update (gap: Duration) -> Self {
+    pub fn new_dont_initial_update(gap: Duration) -> Self {
         Self {
             last_did: Instant::now(),
             gap,
             updater_exists: false,
-            _pd: PhantomData
+            _pd: PhantomData,
         }
     }
 }

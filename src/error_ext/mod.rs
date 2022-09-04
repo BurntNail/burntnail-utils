@@ -13,12 +13,10 @@ mod not_anyhow_just_tracing;
 #[cfg(all(not(feature = "tracing"), feature = "anyhow"))]
 pub use not_anyhow_just_tracing::*;
 
-
 #[cfg(all(not(feature = "anyhow"), feature = "tracing"))]
 mod not_tracing_just_anyhow;
 #[cfg(all(not(feature = "anyhow"), feature = "tracing"))]
 pub use not_tracing_just_anyhow::*;
-
 
 ///Extension trait for errors to quickly do things
 pub trait ErrorExt<T> {

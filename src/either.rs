@@ -22,18 +22,18 @@ impl<L, R> Either<L, R> {
     }
 
     ///Utility function for checking which side it is. Here we check if it is the [`Either::Left`] variant
-    pub fn is_left (&self) -> bool {
+    pub fn is_left(&self) -> bool {
         matches!(self, Either::Left(_))
     }
 
     ///Utility function for checking which side it is. Here we check if it is the [`Either::Right`] variant
-    pub fn is_right (&self) -> bool {
+    pub fn is_right(&self) -> bool {
         matches!(self, Either::Right(_))
     }
 
     //region transformers
     ///Utility function for [`Either::Left`] Vs [`Either::Right`] if you need nice variable names
-    pub fn to_unit (&self) -> Either<(), ()> {
+    pub fn to_unit(&self) -> Either<(), ()> {
         if self.is_left() {
             Either::Left(())
         } else {
@@ -44,7 +44,7 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns an Owned `L`
-    pub fn to_left (self) -> Option<L> {
+    pub fn to_left(self) -> Option<L> {
         if let Either::Left(l) = self {
             Some(l)
         } else {
@@ -54,7 +54,7 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns a reference to an `L`
-    pub fn ref_left (&self) -> Option<&L> {
+    pub fn ref_left(&self) -> Option<&L> {
         if let Either::Left(l) = self {
             Some(l)
         } else {
@@ -64,7 +64,7 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns a mutable reference to an `L`
-    pub fn mut_ref_left (&mut self) -> Option<&mut L> {
+    pub fn mut_ref_left(&mut self) -> Option<&mut L> {
         if let Either::Left(l) = self {
             Some(l)
         } else {
@@ -75,7 +75,7 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns an Owned `L`
-    pub fn to_right (self) -> Option<R> {
+    pub fn to_right(self) -> Option<R> {
         if let Either::Right(r) = self {
             Some(r)
         } else {
@@ -85,7 +85,7 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns a reference to an `L`
-    pub fn ref_right (&self) -> Option<&R> {
+    pub fn ref_right(&self) -> Option<&R> {
         if let Either::Right(r) = self {
             Some(r)
         } else {
@@ -95,7 +95,7 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns a mutable reference to an `L`
-    pub fn mut_ref_right (&mut self) -> Option<&mut R> {
+    pub fn mut_ref_right(&mut self) -> Option<&mut R> {
         if let Either::Right(r) = self {
             Some(r)
         } else {
@@ -107,9 +107,9 @@ impl<L, R> Either<L, R> {
     //TODO: Work out more elegant way (maybe macros) to do above and below transformers
 }
 
-impl <L: Clone, R: Clone> Either<L, R> {
+impl<L: Clone, R: Clone> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
-    pub fn clone_left (&self) -> Option<L> {
+    pub fn clone_left(&self) -> Option<L> {
         if let Either::Left(l) = self.clone() {
             Some(l)
         } else {
@@ -118,7 +118,7 @@ impl <L: Clone, R: Clone> Either<L, R> {
     }
 
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
-    pub fn clone_right (&self) -> Option<R> {
+    pub fn clone_right(&self) -> Option<R> {
         if let Either::Right(r) = self.clone() {
             Some(r)
         } else {
