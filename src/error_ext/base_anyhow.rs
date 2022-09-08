@@ -1,7 +1,10 @@
-use std::{fmt::Display, sync::{LockResult, MutexGuard, Mutex}, any::Any};
-use anyhow::{Result, Context, anyhow};
-
-use super::ErrorExt;
+use crate::error_ext::{ErrorExt, MutexExt};
+use anyhow::{anyhow, Context, Result};
+use std::{
+    any::Any,
+    fmt::Display,
+    sync::{LockResult, Mutex, MutexGuard},
+};
 
 ///Creates a trait with a function `ae(self) -> anyhow::Result`
 macro_rules! to_anyhow_trait {
@@ -48,7 +51,6 @@ impl<T> ToAnyhowNotErr<T> for Option<T> {
         self.ae().context(c).unwrap_log_error()
     }
 }
-
 
 impl<T, E: std::error::Error + Send + Sync + 'static> ToAnyhowErr<T> for std::result::Result<T, E> {
     fn ae(self) -> Result<T> {
@@ -99,12 +101,6 @@ impl<T> ToAnyhowPoisonErr<T> for LockResult<T> {
     }
 }
 
-
-///Utility trait for Mutexes
-pub trait MutexExt<T> {
-    ///Function to unlock or panic using `error!`
-    fn lock_panic<C: Display + Send + Sync + 'static>(&self, msg: C) -> MutexGuard<T>;
-}
 impl<T> MutexExt<T> for Mutex<T> {
     fn lock_panic<C: Display + Send + Sync + 'static>(&self, msg: C) -> MutexGuard<T> {
         self.lock().ae().context(msg).unwrap_log_error()

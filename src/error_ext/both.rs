@@ -1,4 +1,6 @@
 use super::ErrorExt;
+use anyhow::Result;
+use std::sync::{Mutex, MutexGuard};
 use tracing::{error, warn};
 
 impl<T> ErrorExt<T> for Result<T, anyhow::Error> {

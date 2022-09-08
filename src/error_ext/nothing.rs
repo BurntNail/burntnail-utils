@@ -1,7 +1,6 @@
 use super::ErrorExt;
-use anyhow::Error;
 
-impl<T> ErrorExt<T> for Result<T, Error> {
+impl<T, E: std::error::Error> ErrorExt<T> for Result<T, E> {
     fn warn(self) {
         if let Err(e) = self {
             eprintln!("Warning: {e:?}");

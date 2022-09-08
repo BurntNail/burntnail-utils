@@ -8,26 +8,25 @@ mod both;
 #[cfg(all(feature = "anyhow", feature = "tracing"))]
 pub use both::*;
 
+#[cfg(feature = "tracing")]
+mod base_tracing;
+#[cfg(feature = "tracing")]
+pub use base_tracing::*;
+
+#[cfg(feature = "anyhow")]
+mod base_anyhow;
+#[cfg(feature = "anyhow")]
+pub use base_anyhow::*;
+
 #[cfg(all(not(feature = "tracing"), feature = "anyhow"))]
-mod not_anyhow_just_tracing;
+mod only_anyhow;
 #[cfg(all(not(feature = "tracing"), feature = "anyhow"))]
-pub use not_anyhow_just_tracing::*;
+pub use only_anyhow::*;
 
 #[cfg(all(not(feature = "anyhow"), feature = "tracing"))]
-mod not_tracing_just_anyhow;
+mod only_tracing;
 #[cfg(all(not(feature = "anyhow"), feature = "tracing"))]
-pub use not_tracing_just_anyhow::*;
+pub use only_tracing::*;
 
-///Extension trait for errors to quickly do things
-pub trait ErrorExt<T> {
-    ///If `Err` write to [`warn!`]
-    fn warn(self);
-    ///If `Err` write to [`error!`]
-    fn error(self);
-    ///If `Err` write to [`error!`] and [`std::process::exit`] with code 1
-    fn error_exit(self);
-    ///If `Err` write to [`eprintln!`] and [`std::process::exit`] with code 1
-    fn eprint_exit(self);
-    ///If `Err` write to [`error!`] and [`std::process::exit`] with code 1, else return `Ok` value
-    fn unwrap_log_error(self) -> T;
-}
+mod base;
+pub use base::*;
