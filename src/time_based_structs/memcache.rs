@@ -26,10 +26,9 @@ pub struct MemoryTimedCacher<T, const N: usize> {
 
 impl<T: Copy, const N: usize> Default for MemoryTimedCacher<T, N> {
     fn default() -> Self {
-        cfg_if! {
-            if #[cfg(feature = "tracing")] {
-                tracing::trace!(size=%N, mem_size=%std::mem::size_of::<[Option<T>; N]>(), "Making memcache struct");
-            }
+        #[cfg(feature = "tracing")]
+        {
+            tracing::trace!(size=%N, mem_size=%std::mem::size_of::<[Option<T>; N]>(), "Making memcache struct");
         }
 
         Self {

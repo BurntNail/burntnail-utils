@@ -4,10 +4,6 @@
     clippy::nursery,
     clippy::missing_docs_in_private_items
 )]
-
-#[macro_use]
-extern crate cfg_if;
-
 ///Module to hold [`either::Either`]
 pub mod either;
 ///Module to hold commonly-used and widely applicable macros

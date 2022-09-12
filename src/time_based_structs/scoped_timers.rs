@@ -26,13 +26,10 @@ impl ScopedTimer {
 
 impl Drop for ScopedTimer {
     fn drop(&mut self) {
-        cfg_if! {
-            if #[cfg(feature = "tracing")] {
-                tracing::info!(time_taken=?self.start_time.elapsed(), msg=%self.msg);
-            } else {
-                println!("{} took {:?}", self.msg, self.start_time.elapsed());
-            }
-        }
+        #[cfg(feature = "tracing")]
+        tracing::info!(time_taken=?self.start_time.elapsed(), msg=%self.msg);
+        #[cfg(not(feature = "tracing"))]
+        println!("{} took {:?}", self.msg, self.start_time.elapsed());
     }
 }
 
