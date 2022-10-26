@@ -1,3 +1,7 @@
+//!Crate to hold lots of utilities for the author.
+//!
+//!Includes a basic `Either`, some macros, a circular cache, some stuff for time and error extensions
+
 #![warn(
     clippy::all,
     clippy::pedantic,
@@ -24,16 +28,3 @@ mod crate_private {
     ///Trait which cannot be externally implemented
     pub trait Sealed {}
 }
-
-/*
-Testing Template:
-
-#[cfg(test)]
-mod tests {
-    #[cfg(feature = "anyhow")]
-    mod ah {}
-    #[cfg(not(feature = "anyhow"))]
-    mod nah {}
-}
-
- */

@@ -57,11 +57,7 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
     /// # Safety
     /// We check that there is data at the index before we drop the data at the old index
     pub fn push(&mut self, t: T) {
-        let can = if let Some(t) = &mut self.timer {
-            t.can_do()
-        } else {
-            true
-        };
+        let can = self.timer.as_mut().map_or(true, DoOnInterval::can_do);
 
         if can {
             if self.full {
@@ -82,7 +78,7 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
     }
 
     ///Returns whether or not the list is empty
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         !self.full && self.index == 0
     }
 
@@ -98,7 +94,7 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
         let end_index = if self.full { N } else { self.index };
 
         self.data[0..end_index]
-            .into_iter()
+            .iter()
             .map(|opt| unsafe { opt.assume_init_read() })
             .collect()
     }

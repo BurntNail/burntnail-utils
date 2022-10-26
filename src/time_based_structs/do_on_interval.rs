@@ -60,9 +60,7 @@ impl DoOnInterval<GiveUpdaters> {
 
     ///Turns a [`GiveUpdaters`] to an [`UpdateOnCheck`]. Can return the original [`GiveUpdaters`] if an updater currently exists
     #[must_use]
-    pub fn to_update_on_check(
-        self,
-    ) -> Either<DoOnInterval<GiveUpdaters>, DoOnInterval<UpdateOnCheck>> {
+    pub const fn to_update_on_check(self) -> Either<Self, DoOnInterval<UpdateOnCheck>> {
         if self.updater_exists {
             Either::Left(self)
         } else {
@@ -96,7 +94,7 @@ impl DoOnInterval<UpdateOnCheck> {
 
     ///Turns a [`UpdateOnCheck`] to a [`GiveUpdaters`]
     #[must_use]
-    pub fn to_give_updaters(self) -> DoOnInterval<GiveUpdaters> {
+    pub const fn to_give_updaters(self) -> DoOnInterval<GiveUpdaters> {
         DoOnInterval {
             last_did: self.last_did,
             gap: self.gap,

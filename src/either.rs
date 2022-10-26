@@ -22,18 +22,18 @@ impl<L, R> Either<L, R> {
     }
 
     ///Utility function for checking which side it is. Here we check if it is the [`Either::Left`] variant
-    pub fn is_left(&self) -> bool {
-        matches!(self, Either::Left(_))
+    pub const fn is_left(&self) -> bool {
+        matches!(self, Self::Left(_))
     }
 
     ///Utility function for checking which side it is. Here we check if it is the [`Either::Right`] variant
-    pub fn is_right(&self) -> bool {
-        matches!(self, Either::Right(_))
+    pub const fn is_right(&self) -> bool {
+        matches!(self, Self::Right(_))
     }
 
     //region transformers
     ///Utility function for [`Either::Left`] Vs [`Either::Right`] if you need nice variable names
-    pub fn to_unit(&self) -> Either<(), ()> {
+    pub const fn to_unit(&self) -> Either<(), ()> {
         if self.is_left() {
             Either::Left(())
         } else {
@@ -44,8 +44,11 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns an Owned `L`
+    ///
+    ///Non-const due to [E0493](https://doc.rust-lang.org/error-index.html#E0493)
+    #[allow(clippy::missing_const_for_fn)]
     pub fn to_left(self) -> Option<L> {
-        if let Either::Left(l) = self {
+        if let Self::Left(l) = self {
             Some(l)
         } else {
             None
@@ -54,8 +57,8 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns a reference to an `L`
-    pub fn ref_left(&self) -> Option<&L> {
-        if let Either::Left(l) = self {
+    pub const fn ref_left(&self) -> Option<&L> {
+        if let Self::Left(l) = self {
             Some(l)
         } else {
             None
@@ -65,7 +68,7 @@ impl<L, R> Either<L, R> {
     ///
     ///Returns a mutable reference to an `L`
     pub fn mut_ref_left(&mut self) -> Option<&mut L> {
-        if let Either::Left(l) = self {
+        if let Self::Left(l) = self {
             Some(l)
         } else {
             None
@@ -75,8 +78,11 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns an Owned `L`
+    ///
+    ///Non-const due to [E0493](https://doc.rust-lang.org/error-index.html#E0493)
+    #[allow(clippy::missing_const_for_fn)]
     pub fn to_right(self) -> Option<R> {
-        if let Either::Right(r) = self {
+        if let Self::Right(r) = self {
             Some(r)
         } else {
             None
@@ -85,8 +91,8 @@ impl<L, R> Either<L, R> {
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
     ///
     ///Returns a reference to an `L`
-    pub fn ref_right(&self) -> Option<&R> {
-        if let Either::Right(r) = self {
+    pub const fn ref_right(&self) -> Option<&R> {
+        if let Self::Right(r) = self {
             Some(r)
         } else {
             None
@@ -96,7 +102,7 @@ impl<L, R> Either<L, R> {
     ///
     ///Returns a mutable reference to an `L`
     pub fn mut_ref_right(&mut self) -> Option<&mut R> {
-        if let Either::Right(r) = self {
+        if let Self::Right(r) = self {
             Some(r)
         } else {
             None
@@ -110,7 +116,7 @@ impl<L, R> Either<L, R> {
 impl<L: Clone, R: Clone> Either<L, R> {
     ///Function to check if this is [`Either::Left`], and if so return [`Some`] of that, else [`None`]
     pub fn clone_left(&self) -> Option<L> {
-        if let Either::Left(l) = self.clone() {
+        if let Self::Left(l) = self.clone() {
             Some(l)
         } else {
             None
@@ -119,7 +125,7 @@ impl<L: Clone, R: Clone> Either<L, R> {
 
     ///Function to check if this is [`Either::Right`], and if so return [`Some`] of that, else [`None`]
     pub fn clone_right(&self) -> Option<R> {
-        if let Either::Right(r) = self.clone() {
+        if let Self::Right(r) = self.clone() {
             Some(r)
         } else {
             None
