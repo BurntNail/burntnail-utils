@@ -1,5 +1,6 @@
 [package]
 name = "burntnail-utils"
+authors = ["BurntNail <BurntNail@proton.me>"]
 description = "Set of Utilities for Errors, and some cachers/timers/macros"
 version = "0.3.0"
 edition = "2021"
