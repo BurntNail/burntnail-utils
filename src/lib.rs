@@ -8,6 +8,8 @@
 pub mod either;
 ///Module to hold commonly-used and widely applicable macros
 pub mod macros;
+///Module to hold circular list cache
+pub mod memcache;
 ///Module to hold structs which deal with time
 pub mod time_based_structs;
 
@@ -22,3 +24,16 @@ mod crate_private {
     ///Trait which cannot be externally implemented
     pub trait Sealed {}
 }
+
+/*
+Testing Template:
+
+#[cfg(test)]
+mod tests {
+    #[cfg(feature = "anyhow")]
+    mod ah {}
+    #[cfg(not(feature = "anyhow"))]
+    mod nah {}
+}
+
+ */

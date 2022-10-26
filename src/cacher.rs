@@ -1,4 +1,4 @@
-use crate::{time_based_structs::scoped_timers::ScopedTimer};
+use crate::time_based_structs::scoped_timers::ScopedTimer;
 use find_folder::Search::ParentsThenKids;
 use piston_window::{
     Filter, Flip, G2dTexture, G2dTextureContext, PistonWindow, Texture, TextureSettings,
@@ -6,7 +6,7 @@ use piston_window::{
 use std::{collections::HashMap, path::PathBuf, result::Result as SResult};
 
 #[cfg(feature = "anyhow")]
-use crate::error_ext::{ToAnyhowErr};
+use crate::error_ext::ToAnyhowErr;
 #[cfg(feature = "anyhow")]
 use anyhow::{anyhow, Result};
 
@@ -25,8 +25,8 @@ impl Cacher {
     ///
     /// # Errors
     /// Can fail if it can't find the assets folder
-    fn base_new(win: &mut PistonWindow) -> SResult<Self, find_folder::Error> {
-        let path = ParentsThenKids(2, 2).for_folder("assets")?;
+    fn base_new(win: &mut PistonWindow, path: Option<&str>) -> SResult<Self, find_folder::Error> {
+        let path = ParentsThenKids(2, 2).for_folder(path.unwrap_or("assets"))?;
 
         Ok(Self {
             base_path: path,
@@ -35,10 +35,23 @@ impl Cacher {
         })
     }
 
-    fn base_get(&mut self, p: &str) -> SResult<Option<&G2dTexture>, String> {
-        self.base_insert(p).map(|_| self.assets.get(p))
+    ///Base function for getting something
+    ///
+    ///Takes a relative path, returns either `Err(String)` from insertion, or an `Ok(Option)` with the result from the hashmap if insertion had no errors
+    fn base_get(&mut self, p: &str) -> SResult<&G2dTexture, String> {
+        self.base_insert(p)
+            .map(|_| {
+                self.assets
+                    .get(p)
+                    .map(SResult::Ok)
+                    .unwrap_or(SResult::Err("Asset missing in internal storage".into()))
+            })
+            .and_then(std::convert::identity) //Taken from the unstable code, issue: 70142, nice code: `.flatten()`
     }
 
+    ///Base function for inserting something.
+    ///
+    ///Takes a relative path, returns `Ok` if all worked or element already existed, else returns `Err(String)` if failure
     fn base_insert(&mut self, p: &str) -> SResult<(), String> {
         if self.assets.contains_key(p) {
             return Ok(());
@@ -70,8 +83,8 @@ impl Cacher {
     ///
     /// # Errors
     /// Can fail if it can't find the assets folder
-    pub fn new(win: &mut PistonWindow) -> Result<Self> {
-        Cacher::base_new(win).ae()
+    pub fn new(win: &mut PistonWindow, path: Option<&str>) -> Result<Self> {
+        Cacher::base_new(win, path).ae()
     }
 
     ///Gets a [`G2dTexture`] from the cache. Returns [`None`] if there is no asset with that path.

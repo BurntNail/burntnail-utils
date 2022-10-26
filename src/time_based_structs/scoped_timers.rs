@@ -3,8 +3,7 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-
-use super::memcache::MemoryTimedCacher;
+use crate::memcache::MemoryCacher;
 
 ///Struct to time how long actions in a given scope last.
 pub struct ScopedTimer {
@@ -34,31 +33,31 @@ impl Drop for ScopedTimer {
 }
 
 ///Same as [`ScopedTimer`], but updates a [`MemoryTimedCacher`] rather than adding to logs
-pub struct ScopedToListTimer<'a, const N: usize>(&'a mut MemoryTimedCacher<Duration, N>, Instant);
+pub struct ScopedToListTimer<'a, const N: usize>(&'a mut MemoryCacher<Duration, N>, Instant);
 
 impl<'a, const N: usize> ScopedToListTimer<'a, N> {
     ///Creates a new `ScopedToListTimer`, and starts the timer
-    pub fn new(t: &'a mut MemoryTimedCacher<Duration, N>) -> Self {
+    pub fn new(t: &'a mut MemoryCacher<Duration, N>) -> Self {
         Self(t, Instant::now())
     }
 }
 
 impl<'a, const N: usize> Drop for ScopedToListTimer<'a, N> {
     fn drop(&mut self) {
-        self.0.add(self.1.elapsed());
+        self.0.push(self.1.elapsed());
     }
 }
 
 ///Thread-safe version of [`ScopedToListTimer`] that uses [`Arc`] and [`Mutex`] over `&mut`
 pub struct ThreadSafeScopedToListTimer<const N: usize>(
-    Arc<Mutex<MemoryTimedCacher<Duration, N>>>,
+    Arc<Mutex<MemoryCacher<Duration, N>>>,
     Instant,
 );
 
 impl<const N: usize> ThreadSafeScopedToListTimer<N> {
     ///Creates a new `ThreadSafeScopedToListTimer`, and starts the timer
     #[must_use]
-    pub fn new(t: Arc<Mutex<MemoryTimedCacher<Duration, N>>>) -> Self {
+    pub fn new(t: Arc<Mutex<MemoryCacher<Duration, N>>>) -> Self {
         Self(t, Instant::now())
     }
 }
@@ -70,7 +69,7 @@ impl<const N: usize> Drop for ThreadSafeScopedToListTimer<N> {
 
         let elapsed = self.1.elapsed();
         let mut lock = self.0.lock_panic("locking memtimercache for timer");
-        lock.add(elapsed);
+        lock.push(elapsed);
     }
 }
 
@@ -82,7 +81,7 @@ impl<const N: usize> Drop for ThreadSafeScopedToListTimer<N> {
             tracing::error!(?e, "locking memtimercache for timer");
             std::process::exit(1)
         });
-        lock.add(elapsed);
+        lock.push(elapsed);
     }
 }
 
@@ -91,6 +90,6 @@ impl<const N: usize> Drop for ThreadSafeScopedToListTimer<N> {
     fn drop(&mut self) {
         let elapsed = self.1.elapsed();
         let mut lock = self.0.lock().expect("locking memcache for timer");
-        lock.add(elapsed);
+        lock.push(elapsed);
     }
 }
