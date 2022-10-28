@@ -29,9 +29,6 @@ jobs:
       - name: Run cargo check with cargo hack
         run: cargo hack check --feature-powerset --no-dev-deps
 
-      - name: Run cargo test with miri
-        run: cargo miri test
-
   run-tests:
     name: Test Suite
     runs-on: ubuntu-latest
@@ -49,7 +46,7 @@ jobs:
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
-          command: test
+          command: miri test
 
   lints:
     name: Lints

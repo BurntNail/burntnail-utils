@@ -1,9 +1,9 @@
+use crate::memcache::MemoryCacher;
 use std::{
     fmt::Display,
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-use crate::memcache::MemoryCacher;
 
 ///Struct to time how long actions in a given scope last.
 pub struct ScopedTimer {
@@ -62,25 +62,13 @@ impl<const N: usize> ThreadSafeScopedToListTimer<N> {
     }
 }
 
-#[cfg(all(feature = "anyhow", feature = "tracing"))]
+#[cfg(feature = "tracing")]
 impl<const N: usize> Drop for ThreadSafeScopedToListTimer<N> {
     fn drop(&mut self) {
         use crate::error_ext::MutexExt;
 
         let elapsed = self.1.elapsed();
         let mut lock = self.0.lock_panic("locking memtimercache for timer");
-        lock.push(elapsed);
-    }
-}
-
-#[cfg(all(not(feature = "anyhow"), feature = "tracing"))]
-impl<const N: usize> Drop for ThreadSafeScopedToListTimer<N> {
-    fn drop(&mut self) {
-        let elapsed = self.1.elapsed();
-        let mut lock = self.0.lock().unwrap_or_else(|e| {
-            tracing::error!(?e, "locking memtimercache for timer");
-            std::process::exit(1)
-        });
         lock.push(elapsed);
     }
 }
