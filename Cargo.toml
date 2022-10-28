@@ -15,7 +15,14 @@ num-traits = "0.2.15"
 piston_window = { version = "0.124.0", optional = true }
 tracing = { version = "0.1.36", optional = true }
 
+[dev-dependencies]
+criterion = "0.4.0"
+
 [features]
 default = ["tracing"]
 tracing = ["dep:tracing"]
 piston_cacher = ["dep:piston_window", "dep:find_folder"]
+
+[[bench]]
+name = "memcacher"
+harness = false

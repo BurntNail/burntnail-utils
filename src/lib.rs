@@ -18,12 +18,16 @@ pub mod either;
 pub mod macros;
 ///Module to hold circular list cache
 pub mod memcache;
+///Module to hold a 2d array struct
+pub mod multid_array;
 ///Module to hold structs which deal with time
 pub mod time_based_structs;
 
 #[cfg(feature = "piston_cacher")]
 ///Utility cacher for `G2dTexture` objects in a set directory
 pub mod cacher;
+///Module to hold coordinates
+pub mod coords;
 ///Module to hold Error Extension traits. Can appear empty if not many features are enabled
 pub mod error_ext;
 
