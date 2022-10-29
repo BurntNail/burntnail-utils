@@ -41,8 +41,7 @@ impl Cacher {
             .map(|_| {
                 self.assets
                     .get(p)
-                    .map(SResult::Ok)
-                    .unwrap_or(SResult::Err("Asset missing in internal storage".into()))
+                    .ok_or_else(|| "Asset missing in internal storage".into())
             })
             .and_then(std::convert::identity) //Taken from the unstable code, issue: 70142, nice code: `.flatten()`
     }
