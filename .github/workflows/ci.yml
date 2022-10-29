@@ -40,14 +40,13 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: stable
           override: true
-          components: miri
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
-          command: miri test
+          command: test
 
   lints:
     name: Lints
