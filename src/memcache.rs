@@ -1,7 +1,6 @@
 use crate::time_based_structs::do_on_interval::{DoOnInterval, UpdateOnCheck};
 use std::{
     fmt::Debug,
-    mem::MaybeUninit,
     ops::{AddAssign, Div},
     vec::IntoIter,
 };

@@ -13,6 +13,25 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
+      - name: Cargo Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-check-cargo-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-check-cargo-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-check-cargo
+
+      - name: Cargo Target Cache
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-check-cargo-target-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-check-cargo-target-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-check-cargo-target
+
+
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -35,6 +54,25 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+
+      - name: Cargo Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-tests-cargo-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-tests-cargo-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-tests-cargo
+
+      - name: Cargo Target Cache
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-tests-cargo-target-${{ hashFiles('Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-tests-cargo-target-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-tests-cargo-target
+
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -60,19 +98,19 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+          key: ${{ runner.os }}-clippy-cargo-${{ hashFiles('Cargo.toml') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
-            ${{ runner.os }}-cargo
+            ${{ runner.os }}-clippy-cargo-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-clippy-cargo
 
       - name: Cargo Target Cache
         uses: actions/cache@v1
         with:
           path: target
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
+          key: ${{ runner.os }}-clippy-cargo-target-${{ hashFiles('Cargo.toml') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
-            ${{ runner.os }}-cargo-target
+            ${{ runner.os }}-clippy-cargo-target-${{ hashFiles('Cargo.toml') }}
+            ${{ runner.os }}-clippy-cargo-target
             
 
       - name: Install stable toolchain for clippy
