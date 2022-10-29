@@ -118,7 +118,7 @@ impl<
             }
         }
         if oob {
-            *self = Coords::OutOfBounds;
+            *self = Self::OutOfBounds;
         }
 
         self.is_ib()

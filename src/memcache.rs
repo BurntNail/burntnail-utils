@@ -12,7 +12,7 @@ use std::{
 #[derive(Debug)]
 pub struct MemoryCacher<T, const N: usize> {
     ///Holds all the data
-    data: [MaybeUninit<T>; N],
+    data: Vec<T>,
     ///Marks whether or not the array is full of data - useful for after it wraps around
     full: bool,
     ///Holds the index of the last data written in.
@@ -32,7 +32,7 @@ impl<T: Copy, const N: usize> Default for MemoryCacher<T, N> {
         }
 
         Self {
-            data: [MaybeUninit::uninit(); N],
+            data: Vec::with_capacity(N),
             full: false,
             index: 0,
             timer: None,
@@ -61,15 +61,12 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
 
         if can {
             if self.full {
-                unsafe { self.data[self.index].assume_init_drop() };
+                self.data[self.index] = t;
+            } else {
+                self.data.push(t);
             }
 
-            self.data[self.index].write(t);
             self.index = (self.index + 1) % N;
-
-            if self.index == N - 1 {
-                self.full = true;
-            }
 
             if let Some(t) = &mut self.timer {
                 t.update_timer();
@@ -78,44 +75,33 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
     }
 
     ///Returns whether or not the list is empty
-    pub const fn is_empty(&self) -> bool {
-        !self.full && self.index == 0
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
     }
 
     ///Gets all of the elements, with order unimportant
     ///
     /// # Safety
     /// We double check there is data beforehand using the `index` variable and the `full` variable
+    #[must_use]
+    #[allow(clippy::missing_const_for_fn)] //destructor issues
     pub fn get_all(self) -> Vec<T> {
-        if self.is_empty() {
-            return vec![];
-        }
-
-        let end_index = if self.full { N } else { self.index };
-
-        self.data[0..end_index]
-            .iter()
-            .map(|opt| unsafe { opt.assume_init_read() })
-            .collect()
+        self.data
     }
 
     ///Gets all of the elements, with order unimportant, copying all elements to avoid ownership issues
     ///
     /// # Safety
     /// We double check there is data beforehand using the `index` variable and the `full` variable
+    #[must_use]
     pub fn get_all_copy(&self) -> Vec<T> {
         if self.is_empty() {
             //no elements yet
             return vec![];
         }
 
-        let end_index = if self.full { N } else { self.index };
-
-        self.data[0..end_index]
-            .iter()
-            .copied()
-            .map(|opt| unsafe { opt.assume_init_read() })
-            .collect()
+        self.data.clone()
     }
 }
 
@@ -138,6 +124,7 @@ macro_rules! average_impl {
                 T::Output: Default,
             {
                 ///Function to get the average of the items in the list
+                #[must_use]
                 pub fn $name(&self) -> T::Output {
                     if self.is_empty() {
                         return T::Output::default();
@@ -167,6 +154,7 @@ macro_rules! average_fp_impl {
                 T::Output: Default
             {
                 ///Function to get the average of the items in the list
+                #[must_use]
                 pub fn $name(&self) -> T::Output {
                     if self.is_empty() {
                         return T::Output::default();
@@ -193,13 +181,12 @@ average_fp_impl!(f32 => average_f32, f64 => average_f64);
 #[cfg(test)]
 mod tests {
     use crate::memcache::MemoryCacher;
-    use std::mem::MaybeUninit;
 
     #[test]
     pub fn hand_constructed_get_all() {
         let vec = vec![100_i32; 10];
         let list: MemoryCacher<_, 10> = MemoryCacher {
-            data: [MaybeUninit::new(100_i32); 10],
+            data: vec![100_i32; 10],
             full: true,
             index: 9,
             timer: None,
