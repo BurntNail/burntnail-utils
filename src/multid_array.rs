@@ -29,9 +29,6 @@ impl<T: Clone, const W: usize, const H: usize> TwoArray<T, W, H> {
 }
 impl<T, const W: usize, const H: usize> TwoArray<T, W, H> {
     ///Instantiates a new `TwoArray`, with all elements being from the function given
-    ///
-    ///# Safety
-    ///All elements are initialised before the array is assumed.
     pub fn from_function<F: Fn(ArrayCoords<W, H>) -> T>(f: F) -> Self {
         let mut backing = Vec::with_capacity(W * H);
         let mut index = ArrayCoords::default();

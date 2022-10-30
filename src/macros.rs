@@ -4,10 +4,11 @@
 #[macro_export]
 macro_rules! generic_enum {
     ($sealed_name:ident, ($trait_name:ident -> $trait_docs:literal) => $(($unit_struct_name:ident -> $docs:literal)),+) => {
+        #[doc=$trait_docs]
         pub trait $trait_name : $sealed_name {}
 
         $(
-            #[doc=$trait_docs]
+            #[doc=$docs]
             #[derive(Copy, Clone, Debug)]
             pub struct $unit_struct_name;
             impl $sealed_name for $unit_struct_name {}

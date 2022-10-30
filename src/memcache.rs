@@ -47,9 +47,6 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
     ///Adds an element to the list on the following conditions:
     /// - there are no elements
     /// - there is a [`DoOnInterval`] timer, and we can use it
-    ///
-    /// # Safety
-    /// We check that there is data at the index before we drop the data at the old index
     pub fn push(&mut self, t: T) {
         let can = self.timer.as_mut().map_or(true, DoOnInterval::can_do);
 
@@ -75,26 +72,15 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
     }
 
     ///Gets all of the elements, with order unimportant
-    ///
-    /// # Safety
-    /// We double check there is data beforehand using the `index` variable and the `full` variable
     #[must_use]
     #[allow(clippy::missing_const_for_fn)] //destructor issues
     pub fn get_all(self) -> Vec<T> {
         self.data
     }
 
-    ///Gets all of the elements, with order unimportant, copying all elements to avoid ownership issues
-    ///
-    /// # Safety
-    /// We double check there is data beforehand using the `index` variable and the `full` variable
+    ///Gets all of the elements, copying all elements to avoid ownership issues
     #[must_use]
     pub fn get_all_copy(&self) -> Vec<T> {
-        if self.is_empty() {
-            //no elements yet
-            return vec![];
-        }
-
         self.data.clone()
     }
 }
