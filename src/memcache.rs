@@ -25,11 +25,6 @@ pub struct MemoryCacher<T, const N: usize> {
 
 impl<T: Copy, const N: usize> Default for MemoryCacher<T, N> {
     fn default() -> Self {
-        #[cfg(feature = "tracing")]
-        {
-            tracing::trace!(size=%N, mem_size=%std::mem::size_of::<[MaybeUninit<T>; N]>(), "Making memcache struct");
-        }
-
         Self {
             data: Vec::with_capacity(N),
             full: false,

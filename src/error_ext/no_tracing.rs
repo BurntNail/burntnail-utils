@@ -4,13 +4,13 @@ use anyhow::Error;
 impl<T> ErrorExt<T> for Result<T, Error> {
     fn warn(self) {
         if let Err(e) = self {
-            eprintln!("Warning: {e:?}")
+            eprintln!("Warning: {e:?}");
         }
     }
 
     fn error(self) {
         if let Err(e) = self {
-            eprintln!("Error: {e:?}")
+            eprintln!("Error: {e:?}");
         }
     }
 

@@ -80,7 +80,7 @@ impl Cacher {
     /// # Errors
     /// Can fail if it can't find the assets folder
     pub fn new(win: &mut PistonWindow, path: Option<&str>) -> Result<Self> {
-        Cacher::base_new(win, path).ae()
+        Self::base_new(win, path).ae()
     }
 
     ///Gets a [`G2dTexture`] from the cache. Returns [`None`] if there is no asset with that path.
