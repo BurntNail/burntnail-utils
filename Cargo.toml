@@ -2,7 +2,7 @@
 name = "burntnail-utils"
 authors = ["BurntNail <BurntNail@proton.me>"]
 description = "Set of Utilities for Errors, and some cachers/timers/macros"
-version = "0.5.2"
+version = "0.6.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/BurntNail/burntnail-utils/"

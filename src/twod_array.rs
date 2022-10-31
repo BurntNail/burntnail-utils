@@ -1,4 +1,4 @@
-use crate::coords::Coords;
+use crate::{coords::Coords, error_ext::ToAnyhowNotErr};
 use std::ops::{Index, IndexMut};
 
 ///Type alias for Usize coordinates used for Array indexing
@@ -7,7 +7,7 @@ pub type ArrayCoords<const W: usize, const H: usize> = Coords<usize, W, H>;
 ///Struct for a 2D Array, backed by a [`Vec`]
 pub struct TwoArray<T, const W: usize, const H: usize> {
     ///Base of the struct which holds all of the data
-    pub(crate) backing: Vec<T>,
+    pub backing: Vec<T>,
 }
 
 impl<T: Default, const W: usize, const H: usize> Default for TwoArray<T, W, H> {
@@ -46,20 +46,39 @@ impl<T, const W: usize, const H: usize> Index<ArrayCoords<W, H>> for TwoArray<T,
     type Output = T;
 
     fn index(&self, index: ArrayCoords<W, H>) -> &Self::Output {
-        &self.backing[index.to_usize().unwrap_or_default()]
+        &self.backing[index
+            .to_usize()
+            .unwrap_log_error_with_context(|| format!("getting index {index:?}"))]
     }
 }
-
 impl<T, const W: usize, const H: usize> IndexMut<ArrayCoords<W, H>> for TwoArray<T, W, H> {
     fn index_mut(&mut self, index: ArrayCoords<W, H>) -> &mut Self::Output {
-        &mut self.backing[index.to_usize().unwrap_or_default()]
+        &mut self.backing[index
+            .to_usize()
+            .unwrap_log_error_with_context(|| format!("getting index {index:?}"))]
+    }
+}
+impl<T, const W: usize, const H: usize> Index<(usize, usize)> for TwoArray<T, W, H> {
+    type Output = T;
+
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        &self.backing[ArrayCoords::<W, H>::from(index)
+            .to_usize()
+            .unwrap_log_error_with_context(|| format!("getting index {index:?}"))]
+    }
+}
+impl<T, const W: usize, const H: usize> IndexMut<(usize, usize)> for TwoArray<T, W, H> {
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        &mut self.backing[ArrayCoords::<W, H>::from(index)
+            .to_usize()
+            .unwrap_log_error_with_context(|| format!("getting index {index:?}"))]
     }
 }
 
 ///Iterator struct for [`TwoArray`]
 pub struct TwoArrayIterator<T: Clone, const W: usize, const H: usize> {
     ///Base of the struct which holds all of the data
-    pub(crate) backing: Vec<T>,
+    pub backing: Vec<T>,
     ///The current position we're going over
     current_position: ArrayCoords<W, H>,
 }

@@ -18,7 +18,7 @@ impl<T> ErrorExt<T> for Result<T, anyhow::Error> {
     fn error_exit(self) {
         if let Err(e) = self {
             error!(?e, "Fatal Error");
-            std::process::exit(1);
+            panic!("Fatal Error: {e:?}");
         }
     }
 

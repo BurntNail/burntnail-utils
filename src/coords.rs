@@ -1,18 +1,21 @@
 use num_traits::Num;
-use std::{fmt::Debug, ops::AddAssign};
+use std::{
+    fmt::Debug,
+    ops::{Add, AddAssign, Div, Mul, Sub},
+};
 
 ///Utility type to hold a set of T coordinates (where T is a [`Num`] in an `(x, y)` format. Can also represent a piece which was taken.
 ///
 /// (0, 0) is at the top left, with y counting the rows, and x counting the columns
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub enum Coords<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> {
+pub enum Coords<T: Num + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> {
     ///The coordinate is currently off the board, or a taken piece
     OutOfBounds,
     ///The coordinate is currently on the board at these coordinates.
     InBounds(T, T),
 }
 
-impl<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Default
+impl<T: Num + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Default
     for Coords<T, MAX_WIDTH, MAX_HEIGHT>
 {
     fn default() -> Self {
@@ -20,7 +23,7 @@ impl<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Default
     }
 }
 
-impl<T: Num + Debug, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Debug
+impl<T: Num + Debug + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Debug
     for Coords<T, MAX_WIDTH, MAX_HEIGHT>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -35,42 +38,16 @@ impl<T: Num + Debug, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Debug
     }
 }
 
-impl<
-        FROM: Num + PartialOrd<i32>,
-        TO: Num + From<FROM> + PartialOrd<TO> + TryFrom<usize>,
-        const MAX_WIDTH: usize,
-        const MAX_HEIGHT: usize,
-    > TryFrom<(FROM, FROM)> for Coords<TO, MAX_WIDTH, MAX_HEIGHT>
+impl<T: Num + TryFrom<usize> + PartialOrd, const MAX_WIDTH: usize, const MAX_HEIGHT: usize>
+    From<(T, T)> for Coords<T, MAX_WIDTH, MAX_HEIGHT>
 {
-    type Error = anyhow::Error;
-
-    fn try_from((x, y): (FROM, FROM)) -> Result<Self, Self::Error> {
-        let (x, y) = (x.into(), y.into());
-
-        if x < TO::zero() {
-            bail!("x < 0")
-        }
-        if TO::try_from(MAX_WIDTH).map_or(false, |mw| x > mw) {
-            bail!("x > {MAX_WIDTH}")
-        }
-        if y < TO::zero() {
-            bail!("y < 0")
-        }
-        if TO::try_from(MAX_HEIGHT).map_or(false, |mh| y > mh) {
-            bail!("y > {MAX_HEIGHT}")
-        }
-
-        Ok(Self::InBounds(x, y))
-    }
-}
-
-impl<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> From<Coords<T, MAX_WIDTH, MAX_HEIGHT>>
-    for Option<(T, T)>
-{
-    fn from(c: Coords<T, MAX_WIDTH, MAX_HEIGHT>) -> Self {
-        match c {
-            Coords::OutOfBounds => None,
-            Coords::InBounds(x, y) => Some((x, y)),
+    fn from((x, y): (T, T)) -> Self {
+        if T::try_from(MAX_WIDTH).map_or(false, |mw| x > mw)
+            || T::try_from(MAX_HEIGHT).map_or(false, |mh| y > mh)
+        {
+            Self::OutOfBounds
+        } else {
+            Self::InBounds(x, y)
         }
     }
 }
@@ -78,7 +55,7 @@ impl<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> From<Coords<T, MAX
 impl<T: Num + TryFrom<usize> + Into<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize>
     Coords<T, MAX_WIDTH, MAX_HEIGHT>
 {
-    ///Provides an index with which to index a 1D array using the 2D coords, assuming there are 8 rows per column
+    ///Provides an index with which to index a 1D array using the 2D coords, assuming a starting position of (0, 0)
     #[must_use]
     pub fn to_usize(self) -> Option<usize> {
         match self {
@@ -92,7 +69,7 @@ impl<T: Num + TryFrom<usize> + Into<usize>, const MAX_WIDTH: usize, const MAX_HE
 }
 
 impl<
-        T: Num + AddAssign + TryFrom<usize> + Clone,
+        T: Num + AddAssign + TryFrom<usize> + TryInto<usize>,
         const MAX_WIDTH: usize,
         const MAX_HEIGHT: usize,
     > Coords<T, MAX_WIDTH, MAX_HEIGHT>
@@ -125,7 +102,7 @@ impl<
     }
 }
 
-impl<T: Num + Clone, const MAX_WIDTH: usize, const MAX_HEIGHT: usize>
+impl<T: Num + Clone + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize>
     Coords<T, MAX_WIDTH, MAX_HEIGHT>
 {
     ///Provides a utility function for turning `Coords` to an `Option<(T, T)>`
@@ -151,7 +128,9 @@ impl<T: Num + Clone, const MAX_WIDTH: usize, const MAX_HEIGHT: usize>
     }
 }
 
-impl<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Coords<T, MAX_WIDTH, MAX_HEIGHT> {
+impl<T: Num + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize>
+    Coords<T, MAX_WIDTH, MAX_HEIGHT>
+{
     ///Utility function for whether or not it is out of bounds
     #[must_use]
     pub const fn is_oob(&self) -> bool {
@@ -162,6 +141,69 @@ impl<T: Num, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Coords<T, MAX_WIDT
     #[must_use]
     pub const fn is_ib(&self) -> bool {
         matches!(self, Self::InBounds(_, _))
+    }
+}
+
+impl<T: Num + TryFrom<usize> + PartialOrd, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Add
+    for Coords<T, MAX_WIDTH, MAX_HEIGHT>
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::OutOfBounds, _) | (_, Self::OutOfBounds) => Self::OutOfBounds,
+            (Self::InBounds(ax, ay), Self::InBounds(bx, by)) => {
+                let x: T = ax + bx;
+                let y: T = ay + by;
+                Self::from((x, y))
+            }
+        }
+    }
+}
+impl<T: Num + TryFrom<usize> + PartialOrd, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Sub
+    for Coords<T, MAX_WIDTH, MAX_HEIGHT>
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::OutOfBounds, _) | (_, Self::OutOfBounds) => Self::OutOfBounds,
+            (Self::InBounds(ax, ay), Self::InBounds(bx, by)) => {
+                let x: T = ax - bx;
+                let y: T = ay - by;
+                Self::from((x, y))
+            }
+        }
+    }
+}
+impl<
+        T: Num + TryFrom<usize> + PartialOrd + Mul + Copy,
+        const MAX_WIDTH: usize,
+        const MAX_HEIGHT: usize,
+    > Mul<T> for Coords<T, MAX_WIDTH, MAX_HEIGHT>
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        match self {
+            Self::OutOfBounds => Self::OutOfBounds,
+            Self::InBounds(x, y) => Self::from((x * rhs, y * rhs)),
+        }
+    }
+}
+impl<
+        T: Num + TryFrom<usize> + PartialOrd + Div + Copy,
+        const MAX_WIDTH: usize,
+        const MAX_HEIGHT: usize,
+    > Div<T> for Coords<T, MAX_WIDTH, MAX_HEIGHT>
+{
+    type Output = Self;
+
+    fn div(self, rhs: T) -> Self::Output {
+        match self {
+            Self::OutOfBounds => Self::OutOfBounds,
+            Self::InBounds(x, y) => Self::from((x / rhs, y / rhs)),
+        }
     }
 }
 
