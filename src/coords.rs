@@ -4,7 +4,7 @@ use std::{
     ops::{Add, AddAssign, Div, Mul, Sub},
 };
 
-///Utility type to hold a set of T coordinates (where T is a [`Num`] in an `(x, y)` format. Can also represent a piece which was taken.
+///Utility type to hold a set of T coordinates (where T is a [`Num`] in an `(x, y)` format. Can also represent a piece which was taken. If you want coordinates for anywhere, just use `usize::MAX` for the bounds
 ///
 /// (0, 0) is at the top left, with y counting the rows, and x counting the columns
 #[derive(Copy, Clone, PartialEq, Eq)]
