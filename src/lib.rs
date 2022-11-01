@@ -57,3 +57,12 @@ mod crate_private {
     ///Trait which cannot be externally implemented
     pub trait Sealed {}
 }
+
+///NEVER USE IN PRODUCTION. THIS IS A REALLY BAD IDEA
+///
+///COMING FROM PURE LAZINESS
+///
+///NEVER!
+fn get_anything_for_docs<T>() -> T {
+    unsafe { std::mem::MaybeUninit::uninit().assume_init() }
+}

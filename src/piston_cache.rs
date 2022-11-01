@@ -1,3 +1,20 @@
+//! This functions as a basic cacher for Piston2D images
+//!
+//! ## Usage
+//! ```rust
+//!
+//! use burntnail_utils::piston_cache::Cacher;
+//! let mut cacher = Cacher::new(&mut get_anything_for_docs(), Some("assets"));
+//!
+//! //then, we can either insert a bunch of textures on start
+//! cacher.insert("sprite.png")?;
+//! cacher.insert("bg.png")?;
+//!
+//! //or, just grab them as and when we need them
+//! cacher.get("highly-specific-level-thingie.png");
+//!
+//! ```
+
 use crate::time_based_structs::scoped_timers::ScopedTimer;
 use find_folder::Search::ParentsThenKids;
 use piston_window::{

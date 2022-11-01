@@ -1,3 +1,25 @@
+//! This is a circular queue of fixed size, backed by a Vector, optionally using a [`crate::time_based_structs::do_on_interval::DoOnInterval`] to determine on what interval to add items.
+//!
+//! Also includes facilities for getting averages of `T`s that support it.
+//!
+//! For a [`crate::time_based_structs::do_on_interval::DoOnInterval`] example, see the [`crate::time_based_structs`] module-level docs
+//!
+//! ## Use
+//!
+//! ```rust
+//! use burntnail_utils::memcache::MemoryCacher;
+//!
+//! let mut memcache: MemoryCacher<_, 5> = MemoryCacher::new(None);
+//! (0..3).for_each(|i| memcache.push(i));
+//! assert_eq!(memcache.get_all_copy(), (0..3).collect::<Vec<_>>()); //now, the list has 3 `i32`s, but isn't full
+//!
+//! memcache.push(3); memcache.push(4);
+//! assert_eq!(memcache.get_all_copy(), (0..5).collect::<Vec<_>>()); //now, the list has 5 `i32`s, but is full, so if we add more it starts to overwrite from the beginning
+//!
+//! memcache.push(10); memcache.push(11);
+//! assert_eq!(memcache.get_all_copy(), vec![10, 11, 2, 3, 4]); //now, the list has some of our original items, but has overwritten the first few as it went over N
+//! ```
+
 use crate::time_based_structs::do_on_interval::{DoOnInterval, UpdateOnCheck};
 use std::{
     fmt::Debug,
@@ -55,6 +77,10 @@ impl<T: Copy, const N: usize> MemoryCacher<T, N> {
                 self.data[self.index] = t;
             } else {
                 self.data.push(t);
+            }
+
+            if self.index == N - 1 {
+                self.full = true;
             }
 
             self.index = (self.index + 1) % N;
