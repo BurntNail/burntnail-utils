@@ -7,9 +7,9 @@ use std::{
 
 ///Extension trait for errors to quickly do things
 pub trait ErrorExt<T> {
-    ///If `Err` write to [`warn!`]
+    ///If `Err` write to `warn!`
     fn warn(self);
-    ///If `Err` write to [`error!`]
+    ///If `Err` write to `error!`
     fn error(self);
     ///If `Err` write to error out if not using stdlib logging (eg. `error!`) and then to [`panic!`] with the error.
     fn error_exit(self);
@@ -35,9 +35,9 @@ macro_rules! to_anyhow_trait {
                 #[allow(clippy::missing_errors_doc)]
                 fn ae (self) -> anyhow::Result<T>;
 
-                ///Function that is the same as [`ErrorExit::unwrap_log_error`] only this includes an easy way to get context
+                ///Function that is the same as [`ErrorExt::unwrap_log_error`] only this includes an easy way to get context
                 fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C> (self, f: F) -> T;
-                ///Function that is the same as [`ErrorExit::unwrap_log_error`] only this includes an easy way to get context
+                ///Function that is the same as [`ErrorExt::unwrap_log_error`] only this includes an easy way to get context
                 fn unwap_log_error_context<C: Display + Send + Sync + 'static> (self, c: C) -> T;
             }
         )+

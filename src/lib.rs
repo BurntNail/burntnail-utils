@@ -19,7 +19,7 @@
 //! This struct is useful if we want to do anything on an interval, like sending a network request or logging an average.
 //!
 //! ### Scoped Timer
-//! I love this for logging! It starts a timer when you make the object, and on [`std::drop::Drop`] it logs out the time since the timer started, making for very conventient logging.
+//! I love this for logging! It starts a timer when you make the object, and on [`std::ops::Drop`] it logs out the time since the timer started, making for very conventient logging.
 //!
 //! ## Coords
 //! Some nice 2D Coordinates, with support for maximum positions, and generic types using the `num_traits`.

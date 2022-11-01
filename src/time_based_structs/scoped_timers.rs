@@ -32,7 +32,7 @@ impl Drop for ScopedTimer {
     }
 }
 
-///Same as [`ScopedTimer`], but updates a [`MemoryTimedCacher`] rather than adding to logs
+///Same as [`ScopedTimer`], but updates a [`crate::memcache::MemoryCacher`] rather than adding to logs
 pub struct ScopedToListTimer<'a, const N: usize>(&'a mut MemoryCacher<Duration, N>, Instant);
 
 impl<'a, const N: usize> ScopedToListTimer<'a, N> {

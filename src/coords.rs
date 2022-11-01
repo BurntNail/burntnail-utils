@@ -1,19 +1,63 @@
+//!Contains a type for containing a 2D coordinates, with [`usize`] bounds
+//!
+//! ## General Use
+//! Coordinates generally have bounds, and here, you can use that in combination with all of the other trait implementations to ensure your coordinate is always valid.
+//!
+//! For example, when making a coordinate, if the provided coordinates are out of bounds, then the enum variant will be Out Of Bounds. This can also occur if you add coordinates and the result is OOB.
+//!```rust
+//! use burntnail_utils::coords::Coords;
+//!
+//! let coords: Coords<i32, 100, 100> = Coords::from((1000, 1000));
+//! assert!(coords.is_oob());
+//!
+//!
+//! let a: Coords<i32, 100, 100> = Coords::from((75, 75));
+//! assert!(a.is_ib());
+//! assert!((a + a).is_oob());
+//!
+//!
+//! let mut b: Coords<i32, 100, 100> = Coords::from((98, 99));
+//! assert!(b.is_ib()); //98, 99 is inbounds
+//!
+//! assert!(b.increment()); //if we increment and stay inbounds then increment returns true
+//! assert!(b.is_ib()); //99, 99 is inbounds
+//!
+//! assert!(!b.increment()); //now we go oob, so increment returns false
+//! assert!(b.is_oob()); //0, 100 is oob
+//! ```
+//!
+//! There are also lots of conditional trait implementations, as you can see. For example, if your `T` provides [`std::fmt::Debug`], then the Coordinates will also be debuggable.
+//!
+//! ## Array-Related Uses
+//!
+//! These Coordinates can also be used in conjunction with arrays.
+//!
+//! For example, they can be used to index into [`crate::twod_array::TwoArray`] assuming `Coords::MAX_WIDTH == TwoArray::WIDTH && Coords::MAX_HEIGHT == TwoArray::HEIGHT`.
+//!
+//! Also, if you're running a 1D backing for a homemade 2D array, if `T: Into<usize>`, then you can get a usize index to index an array with.
+
 use num_traits::Num;
 use std::{
     fmt::Debug,
     ops::{Add, AddAssign, Div, Mul, Sub},
 };
-
 ///Utility type to hold a set of T coordinates (where T is a [`Num`] in an `(x, y)` format. Can also represent a piece which was taken. If you want coordinates for anywhere, just use `usize::MAX` for the bounds
 ///
-/// (0, 0) is at the top left, with y counting the rows, and x counting the columns
+/// (0, 0) is at the top left, with y counting the rows, and x counting the columns.
+///
+/// NB: These bounds are **exclusive**
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum Coords<T: Num + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> {
     ///The coordinate is currently off the board, or a taken piece
+    ///
+    ///Any operation performed on or with Out of Bounds coordinates will return Out of Bounds coordinates.
     OutOfBounds,
     ///The coordinate is currently on the board at these coordinates.
     InBounds(T, T),
 }
+
+///Utility type for coordinates that can exist without maximum x or y positions.
+pub type UnboundedCoord<T> = Coords<T, { usize::MAX }, { usize::MAX }>;
 
 impl<T: Num + TryFrom<usize>, const MAX_WIDTH: usize, const MAX_HEIGHT: usize> Default
     for Coords<T, MAX_WIDTH, MAX_HEIGHT>
@@ -42,8 +86,8 @@ impl<T: Num + TryFrom<usize> + PartialOrd, const MAX_WIDTH: usize, const MAX_HEI
     From<(T, T)> for Coords<T, MAX_WIDTH, MAX_HEIGHT>
 {
     fn from((x, y): (T, T)) -> Self {
-        if T::try_from(MAX_WIDTH).map_or(false, |mw| x > mw)
-            || T::try_from(MAX_HEIGHT).map_or(false, |mh| y > mh)
+        if T::try_from(MAX_WIDTH).map_or(false, |mw| x >= mw)
+            || T::try_from(MAX_HEIGHT).map_or(false, |mh| y >= mh)
         {
             Self::OutOfBounds
         } else {
@@ -69,7 +113,7 @@ impl<T: Num + TryFrom<usize> + Into<usize>, const MAX_WIDTH: usize, const MAX_HE
 }
 
 impl<
-        T: Num + AddAssign + TryFrom<usize> + TryInto<usize>,
+        T: Num + AddAssign + TryFrom<usize> + TryInto<usize> + PartialOrd,
         const MAX_WIDTH: usize,
         const MAX_HEIGHT: usize,
     > Coords<T, MAX_WIDTH, MAX_HEIGHT>
@@ -80,11 +124,11 @@ impl<
     ///
     ///Returns true if result isn't OOB
     pub fn increment(&mut self) -> bool {
-        let mut oob = false;
+        let mut oob = self.is_oob();
 
         if let Self::InBounds(cx, cy) = self {
-            if T::try_from(MAX_WIDTH - 1).map_or(false, |mw| *cx == mw) {
-                if T::try_from(MAX_HEIGHT - 1).map_or(false, |mh| *cy == mh) {
+            if T::try_from(MAX_WIDTH - 1).map_or(false, |mw| *cx >= mw) {
+                if T::try_from(MAX_HEIGHT - 1).map_or(false, |mh| *cy >= mh) {
                     oob = true;
                 } else {
                     *cx = T::zero();
@@ -94,11 +138,11 @@ impl<
                 *cx += T::one();
             }
         }
-        if oob {
+        if !self.is_oob() && oob {
             *self = Self::OutOfBounds;
         }
 
-        self.is_ib()
+        !oob
     }
 }
 

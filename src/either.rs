@@ -1,3 +1,7 @@
+//! An Either type for representing something that can be A or B. Similar ergonomics to a [`std::result::Result`], and if need be you can convert easily to one.
+//!
+//! Includes lots of transformers to get values out of an option, as well as conditional implementations like [`std::clone::Clone`] and [`std::fmt::Debug`]
+
 use std::fmt::{Debug, Formatter};
 
 ///Enum which can represent one of two values
@@ -106,6 +110,15 @@ impl<L, R> Either<L, R> {
             Some(r)
         } else {
             None
+        }
+    }
+
+    ///Converts Either<L, R> to Result<L, R>
+    #[allow(clippy::missing_errors_doc, clippy::missing_const_for_fn)] //no need, issue with destructors
+    pub fn to_result(self) -> Result<L, R> {
+        match self {
+            Self::Left(l) => Ok(l),
+            Self::Right(r) => Err(r),
         }
     }
 
