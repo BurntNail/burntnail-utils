@@ -1,4 +1,4 @@
-use crate::{coords::Coords, error_ext::ToAnyhowNotErr};
+use crate::{coords::Coords, error_ext::ToNotErr};
 use std::ops::{Index, IndexMut};
 
 ///Type alias for Usize coordinates used for Array indexing

@@ -23,7 +23,7 @@ use piston_window::{
 use std::{collections::HashMap, path::PathBuf, result::Result as SResult};
 
 use crate::{
-    error_ext::ToAnyhowErr,
+    error_ext::ToErr,
     error_types::{Error, Result},
 };
 

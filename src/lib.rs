@@ -3,7 +3,7 @@
 //! ## Error Extension
 //! Includes a bunch of stuff for handling errors. For example `anyhow::Result::Err(5).warn();` will print "Warning: 5" to stderr, or via `tracing` means.
 //!
-//! Also includes utilities for hard to handle error types, and unwrapping them with tracing logs, or converting them to anyhow results.
+//! Also includes utilities for hard to handle error types, and unwrapping them with tracing logs, or converting them to anyhow/color-eyre results.
 //!
 //! ## Either
 //! An enumeration for representing an object with can be either A or B, with utility methods to convert to one or the other.

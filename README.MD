@@ -4,7 +4,7 @@ Hey! You've found my general utilities for use with rust.
 There are quite a few now, and it includes optional `tracing` support, with standard `println` and `eprintln` as fallbacks.
 
 ## Error Extensions
-Mainly designed as a utility for use with `anyhow`, so includes ways to turn things like `Option` and `PosionErr` into Anyhow Errors.
+Mainly designed as a utility for use with `anyhow` and `color-eyre`, so includes ways to turn things like `Option` and `PosionErr` into Anyhow Errors.
 
 Also includes a trait for quickly logging errors, as an alternative to `unwrap` and `expect`
 

@@ -44,14 +44,14 @@ macro_rules! to_error_result_trait {
     };
 }
 to_error_result_trait!(
-    ToAnyhowErr => "Trait to turn [`std::error::Error`] to [`Error`]",
-    ToAnyhowNotErr => "Trait to turn non-errors (like [`Option`]) to [`Error`]",
-    ToAnyhowPoisonErr => "Trait to turn `Box<dyn Any + Send + 'static>` to [`Error`]",
-    ToAnyhowThreadErr => "Trait to turn [`std::sync::LockResult`] to [`Result`]"
+    ToErr => "Trait to turn [`std::error::Error`] to [`Error`]",
+    ToNotErr => "Trait to turn non-errors (like [`Option`]) to [`Error`]",
+    ToPoisonErr => "Trait to turn `Box<dyn Any + Send + 'static>` to [`Error`]",
+    ToThreadErr => "Trait to turn [`std::sync::LockResult`] to [`Result`]"
 );
 //To avoid overlapping trait bounds
 
-impl<T> ToAnyhowNotErr<T> for Option<T> {
+impl<T> ToNotErr<T> for Option<T> {
     fn ae(self) -> Result<T> {
         match self {
             Some(s) => Ok(s),
@@ -71,7 +71,7 @@ impl<T> ToAnyhowNotErr<T> for Option<T> {
     }
 }
 
-impl<T, E: std::error::Error + Send + Sync + 'static> ToAnyhowErr<T> for std::result::Result<T, E> {
+impl<T, E: std::error::Error + Send + Sync + 'static> ToErr<T> for std::result::Result<T, E> {
     fn ae(self) -> Result<T> {
         self.map_err(Error::new)
     }
@@ -87,7 +87,7 @@ impl<T, E: std::error::Error + Send + Sync + 'static> ToAnyhowErr<T> for std::re
         self.ae().context(c).unwrap_log_error()
     }
 }
-impl<T> ToAnyhowThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'static>> {
+impl<T> ToThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'static>> {
     fn ae(self) -> Result<T> {
         self.map_err(|_| Error::msg("Error joining thread"))
     }
@@ -103,7 +103,7 @@ impl<T> ToAnyhowThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'st
         self.ae().context(c).unwrap_log_error()
     }
 }
-impl<T> ToAnyhowPoisonErr<T> for LockResult<T> {
+impl<T> ToPoisonErr<T> for LockResult<T> {
     fn ae(self) -> Result<T> {
         self.map_err(|e| Error::msg(format!("{}", e)))
     }
