@@ -1,4 +1,4 @@
-//! This functions as a basic cacher for Piston2D images
+//! This functions as a basic cacher for `Piston2D` images
 //!
 //! ## Usage
 //! ```rust

@@ -1,3 +1,5 @@
+//! Module to hold all error extensions
+
 ///All of the stuff from anyhow that I use
 mod anyhow_stuff;
 pub use anyhow_stuff::*;

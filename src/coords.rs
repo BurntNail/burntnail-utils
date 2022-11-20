@@ -104,10 +104,9 @@ impl<T: Num + TryFrom<usize> + Into<usize>, const MAX_WIDTH: usize, const MAX_HE
     pub fn to_usize(self) -> Option<usize> {
         match self {
             Self::OutOfBounds => None,
-            Self::InBounds(x, y) => match T::try_from(MAX_WIDTH) {
-                Ok(multiplier) => Some((y * multiplier + x).into()),
-                Err(_) => None,
-            },
+            Self::InBounds(x, y) => {
+                T::try_from(MAX_WIDTH).map_or(None, |multiplier| Some((y * multiplier + x).into()))
+            }
         }
     }
 }

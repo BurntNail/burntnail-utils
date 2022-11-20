@@ -1,3 +1,5 @@
+//! A module to hold a 2D grid array
+
 use crate::{coords::Coords, error_ext::ToNotErr};
 use std::ops::{Index, IndexMut};
 

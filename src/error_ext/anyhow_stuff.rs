@@ -53,10 +53,7 @@ to_error_result_trait!(
 
 impl<T> ToNotErr<T> for Option<T> {
     fn ae(self) -> Result<T> {
-        match self {
-            Some(s) => Ok(s),
-            None => Err(Error::msg("None variant encountered")),
-        }
+        self.map_or_else(|| Err(Error::msg("None variant encountered")), |s| Ok(s))
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(

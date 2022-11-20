@@ -1,6 +1,7 @@
 //! Library module for anyhow vs color-eyre
 //!
 //! The expectation is that you will use this for all error types.
+#![allow(clippy::use_self)]
 
 ///Trait for providing context to an error
 pub trait Contextable<RES> {
@@ -24,7 +25,9 @@ mod eyre_mod {
     use color_eyre::eyre::WrapErr;
     use std::fmt::Display;
 
+    ///Color-eyre result type
     pub type Result<T> = color_eyre::Result<T>;
+    ///Color-eyre error type
     pub type Error = color_eyre::Report;
 
     impl<T> Contextable<Result<T>> for Result<T> {
@@ -57,7 +60,9 @@ mod anyhow_mod {
     use anyhow::Context;
     use std::fmt::Display;
 
+    ///Anyhow result type
     pub type Result<T> = anyhow::Result<T>;
+    ///Anyhow error type
     pub type Error = anyhow::Error;
 
     impl<T> Contextable<Result<T>> for Result<T> {
