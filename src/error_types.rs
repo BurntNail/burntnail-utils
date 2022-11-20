@@ -26,19 +26,19 @@ mod eyre_mod {
     use std::fmt::Display;
 
     ///Color-eyre result type
-    pub type Result<T> = color_eyre::Result<T>;
+    pub type BResult<T> = color_eyre::Result<T>;
     ///Color-eyre error type
-    pub type Error = color_eyre::Report;
+    pub type BError = color_eyre::Report;
 
-    impl<T> Contextable<Result<T>> for Result<T> {
-        fn context<C>(self, context: C) -> Result<T>
+    impl<T> Contextable<BResult<T>> for BResult<T> {
+        fn context<C>(self, context: C) -> BResult<T>
         where
             C: Display + Send + Sync + 'static,
         {
             WrapErr::context(self, context)
         }
 
-        fn with_context<C, F>(self, f: F) -> Result<T>
+        fn with_context<C, F>(self, f: F) -> BResult<T>
         where
             C: Display + Send + Sync + 'static,
             F: FnOnce() -> C,
@@ -61,19 +61,19 @@ mod anyhow_mod {
     use std::fmt::Display;
 
     ///Anyhow result type
-    pub type Result<T> = anyhow::Result<T>;
+    pub type BResult<T> = anyhow::Result<T>;
     ///Anyhow error type
-    pub type Error = anyhow::Error;
+    pub type BError = anyhow::Error;
 
-    impl<T> Contextable<Result<T>> for Result<T> {
-        fn context<C>(self, context: C) -> Result<T>
+    impl<T> Contextable<BResult<T>> for BResult<T> {
+        fn context<C>(self, context: C) -> BResult<T>
         where
             C: Display + Send + Sync + 'static,
         {
             Context::context(self, context)
         }
 
-        fn with_context<C, F>(self, f: F) -> Result<T>
+        fn with_context<C, F>(self, f: F) -> BResult<T>
         where
             C: Display + Send + Sync + 'static,
             F: FnOnce() -> C,

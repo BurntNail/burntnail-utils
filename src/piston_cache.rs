@@ -24,7 +24,7 @@ use std::{collections::HashMap, path::PathBuf, result::Result as SResult};
 
 use crate::{
     error_ext::ToErr,
-    error_types::{Error, Result},
+    error_types::{BError, BResult},
 };
 
 ///Struct to hold a cache of [`G2dTexture`]s
@@ -98,7 +98,7 @@ impl Cacher {
     ///
     /// # Errors
     /// Can fail if it can't find the assets folder
-    pub fn new(win: &mut PistonWindow, path: Option<&str>) -> Result<Self> {
+    pub fn new(win: &mut PistonWindow, path: Option<&str>) -> BResult<Self> {
         Self::base_new(win, path).ae()
     }
 
@@ -106,10 +106,10 @@ impl Cacher {
     ///
     /// # Errors
     /// - Unable to find the texture using [`Texture::from_path`]
-    pub fn get(&mut self, p: &str) -> Result<&G2dTexture> {
+    pub fn get(&mut self, p: &str) -> BResult<&G2dTexture> {
         match self.base_get(p) {
             Ok(tex) => Ok(tex),
-            Err(e) => Err(Error::msg(format!("Texture Get Error: {e}"))),
+            Err(e) => Err(BError::msg(format!("Texture Get Error: {e}"))),
         }
     }
 
@@ -117,8 +117,8 @@ impl Cacher {
     ///
     /// # Errors
     /// - Unable to find the texture using [`Texture::from_path`]
-    pub fn insert(&mut self, p: &str) -> Result<()> {
+    pub fn insert(&mut self, p: &str) -> BResult<()> {
         self.base_insert(p)
-            .map_err(|s| Error::msg(format!("Texture Insert Error: {s}")))
+            .map_err(|s| BError::msg(format!("Texture Insert Error: {s}")))
     }
 }

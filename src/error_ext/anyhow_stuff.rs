@@ -1,4 +1,4 @@
-use crate::error_types::{Contextable, Error, Result};
+use crate::error_types::{BError, BResult, Contextable};
 use std::{
     any::Any,
     fmt::Display,
@@ -33,7 +33,7 @@ macro_rules! to_error_result_trait {
             pub trait $name<T> {
                 ///Converter function to [`Result`]
                 #[allow(clippy::missing_errors_doc)]
-                fn ae (self) -> crate::error_types::Result<T>;
+                fn ae (self) -> crate::error_types::BResult<T>;
 
                 ///Function that is the same as [`ErrorExt::unwrap_log_error`] only this includes an easy way to get context
                 fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C> (self, f: F) -> T;
@@ -52,8 +52,8 @@ to_error_result_trait!(
 //To avoid overlapping trait bounds
 
 impl<T> ToNotErr<T> for Option<T> {
-    fn ae(self) -> Result<T> {
-        self.map_or_else(|| Err(Error::msg("None variant encountered")), |s| Ok(s))
+    fn ae(self) -> BResult<T> {
+        self.map_or_else(|| Err(BError::msg("None variant encountered")), |s| Ok(s))
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
@@ -69,8 +69,8 @@ impl<T> ToNotErr<T> for Option<T> {
 }
 
 impl<T, E: std::error::Error + Send + Sync + 'static> ToErr<T> for std::result::Result<T, E> {
-    fn ae(self) -> Result<T> {
-        self.map_err(Error::new)
+    fn ae(self) -> BResult<T> {
+        self.map_err(BError::new)
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
@@ -85,8 +85,8 @@ impl<T, E: std::error::Error + Send + Sync + 'static> ToErr<T> for std::result::
     }
 }
 impl<T> ToThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'static>> {
-    fn ae(self) -> Result<T> {
-        self.map_err(|_| Error::msg("Error joining thread"))
+    fn ae(self) -> BResult<T> {
+        self.map_err(|_| BError::msg("Error joining thread"))
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
@@ -101,8 +101,8 @@ impl<T> ToThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'static>>
     }
 }
 impl<T> ToPoisonErr<T> for LockResult<T> {
-    fn ae(self) -> Result<T> {
-        self.map_err(|e| Error::msg(format!("{}", e)))
+    fn ae(self) -> BResult<T> {
+        self.map_err(|e| BError::msg(format!("{}", e)))
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
