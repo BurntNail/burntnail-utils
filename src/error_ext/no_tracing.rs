@@ -1,7 +1,6 @@
-use crate::error_ext::ErrorExt;
-use anyhow::Error;
+use crate::{error_ext::ErrorExt, error_types::Result};
 
-impl<T> ErrorExt<T> for Result<T, Error> {
+impl<T> ErrorExt<T> for Result<T> {
     fn warn(self) {
         if let Err(e) = self {
             eprintln!("Warning: {e:?}");

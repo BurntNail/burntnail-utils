@@ -38,10 +38,8 @@
     clippy::missing_docs_in_private_items
 )]
 
-#[macro_use]
-extern crate anyhow;
-
 pub mod either;
+pub mod error_types;
 pub mod macros;
 pub mod memcache;
 pub mod time_based_structs;
@@ -56,13 +54,4 @@ pub mod twod_array;
 mod crate_private {
     ///Trait which cannot be externally implemented
     pub trait Sealed {}
-}
-
-///NEVER USE IN PRODUCTION. THIS IS A REALLY BAD IDEA
-///
-///COMING FROM PURE LAZINESS
-///
-///NEVER!
-fn get_anything_for_docs<T>() -> T {
-    unsafe { std::mem::MaybeUninit::uninit().assume_init() }
 }

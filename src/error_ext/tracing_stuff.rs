@@ -1,8 +1,8 @@
 use super::ErrorExt;
-use anyhow::Result;
+use crate::error_types::Result;
 use tracing::{error, warn};
 
-impl<T> ErrorExt<T> for Result<T, anyhow::Error> {
+impl<T> ErrorExt<T> for Result<T> {
     fn warn(self) {
         if let Err(e) = self {
             warn!(?e);

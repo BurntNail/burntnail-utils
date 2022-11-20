@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use crate::error_types::{Contextable, Error, Result};
 use std::{
     any::Any,
     fmt::Display,
@@ -25,15 +25,15 @@ pub trait MutexExt<T> {
     fn lock_panic<C: Display + Send + Sync + 'static>(&self, msg: C) -> MutexGuard<T>;
 }
 
-///Creates a trait with a function `ae(self) -> anyhow::Result`
-macro_rules! to_anyhow_trait {
+///Creates a trait with a function `ae(self) -> crate::error_types::Result`
+macro_rules! to_error_result_trait {
     ($($name:ident => $doc:expr),+) => {
         $(
             #[doc=$doc]
             pub trait $name<T> {
-                ///Converter function to [`anyhow::Result`]
+                ///Converter function to [`Result`]
                 #[allow(clippy::missing_errors_doc)]
-                fn ae (self) -> anyhow::Result<T>;
+                fn ae (self) -> crate::error_types::Result<T>;
 
                 ///Function that is the same as [`ErrorExt::unwrap_log_error`] only this includes an easy way to get context
                 fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C> (self, f: F) -> T;
@@ -43,11 +43,11 @@ macro_rules! to_anyhow_trait {
         )+
     };
 }
-to_anyhow_trait!(
-    ToAnyhowErr => "Trait to turn [`std::error::Error`] to [`anyhow::Error`]",
-    ToAnyhowNotErr => "Trait to turn non-errors (like [`Option`]) to [`anyhow::Error`]",
-    ToAnyhowPoisonErr => "Trait to turn `Box<dyn Any + Send + 'static>` to [`anyhow::Error`]",
-    ToAnyhowThreadErr => "Trait to turn [`std::sync::LockResult`] to [`anyhow::Result`]"
+to_error_result_trait!(
+    ToAnyhowErr => "Trait to turn [`std::error::Error`] to [`Error`]",
+    ToAnyhowNotErr => "Trait to turn non-errors (like [`Option`]) to [`Error`]",
+    ToAnyhowPoisonErr => "Trait to turn `Box<dyn Any + Send + 'static>` to [`Error`]",
+    ToAnyhowThreadErr => "Trait to turn [`std::sync::LockResult`] to [`Result`]"
 );
 //To avoid overlapping trait bounds
 
@@ -55,7 +55,7 @@ impl<T> ToAnyhowNotErr<T> for Option<T> {
     fn ae(self) -> Result<T> {
         match self {
             Some(s) => Ok(s),
-            None => Err(anyhow!("empty option")),
+            None => Err(Error::msg("None variant encountered")),
         }
     }
 
@@ -73,7 +73,7 @@ impl<T> ToAnyhowNotErr<T> for Option<T> {
 
 impl<T, E: std::error::Error + Send + Sync + 'static> ToAnyhowErr<T> for std::result::Result<T, E> {
     fn ae(self) -> Result<T> {
-        self.map_err(|e| anyhow::Error::new(e))
+        self.map_err(Error::new)
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
@@ -89,7 +89,7 @@ impl<T, E: std::error::Error + Send + Sync + 'static> ToAnyhowErr<T> for std::re
 }
 impl<T> ToAnyhowThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'static>> {
     fn ae(self) -> Result<T> {
-        self.map_err(|_| anyhow!("Error joining thread"))
+        self.map_err(|_| Error::msg("Error joining thread"))
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
@@ -105,7 +105,7 @@ impl<T> ToAnyhowThreadErr<T> for std::result::Result<T, Box<dyn Any + Send + 'st
 }
 impl<T> ToAnyhowPoisonErr<T> for LockResult<T> {
     fn ae(self) -> Result<T> {
-        self.map_err(|e| anyhow!("{}", e))
+        self.map_err(|e| Error::msg(format!("{}", e)))
     }
 
     fn unwrap_log_error_with_context<C: Display + Send + Sync + 'static, F: FnOnce() -> C>(
