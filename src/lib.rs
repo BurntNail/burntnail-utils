@@ -38,6 +38,9 @@
     clippy::missing_docs_in_private_items
 )]
 
+#[cfg(all(feature = "ah", feature = "eyre"))]
+compile_error!("Cannot Have Both Anyhow & Eyre activated at once");
+
 pub mod either;
 pub mod error_types;
 pub mod macros;

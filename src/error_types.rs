@@ -3,8 +3,10 @@
 //! The expectation is that you will use this for all error types.
 #![allow(clippy::use_self)]
 
+use std::fmt::Display;
+
 ///Trait for providing context to an error
-pub trait Contextable<RES> {
+pub trait Contextable<RES = Self> {
     /// Wrap the error value with additional context
     fn context<C>(self, context: C) -> RES
     where
@@ -30,7 +32,7 @@ mod eyre_mod {
     ///Color-eyre error type
     pub type BError = color_eyre::Report;
 
-    impl<T> Contextable<BResult<T>> for BResult<T> {
+    impl<T> Contextable for BResult<T> {
         fn context<C>(self, context: C) -> BResult<T>
         where
             C: Display + Send + Sync + 'static,
@@ -53,7 +55,7 @@ mod eyre_mod {
     }
 }
 
-#[cfg(not(feature = "eyre"))]
+#[cfg(feature = "ah")]
 ///Anyhow stuff
 mod anyhow_mod {
     use super::Contextable;
@@ -65,7 +67,7 @@ mod anyhow_mod {
     ///Anyhow error type
     pub type BError = anyhow::Error;
 
-    impl<T> Contextable<BResult<T>> for BResult<T> {
+    impl<T> Contextable for BResult<T> {
         fn context<C>(self, context: C) -> BResult<T>
         where
             C: Display + Send + Sync + 'static,
@@ -88,8 +90,50 @@ mod anyhow_mod {
     }
 }
 
-#[cfg(not(feature = "eyre"))]
+#[cfg(not(any(feature = "ah", feature = "eyre")))]
+mod std_mod {
+    use std::error::Error;
+
+    pub struct BError {
+        inner: Box<dyn Error>,
+        contexts: Vec<String>,
+    }
+
+    impl<T: Error> From<T> for BError {
+        fn from (e: T) -> Self {
+            Self {
+                inner: Box::new(e),
+                contexts: Vec::new()
+            }
+        }
+    }
+
+    pub type BResult<T> = Result<T, BError>;
+
+    impl<T> Contextable for BResult<T> {
+        fn context<C>(self, context: C) -> BResult<T>
+        where
+            C: Display + Send + Sync + 'static,
+        {
+            let mut s = self;
+            s.contexts.push(context.to_string());
+            s
+        }
+
+        ///NB: Not lazily evaluated
+        fn with_context<C, F>(self, f: F) -> BResult<T>
+        where
+            C: Display + Send + Sync + 'static,
+            F: FnOnce() -> C,
+        {
+            self.context(f());
+        }
+    }
+}
+
+#[cfg(feature = "ah")]
 pub use anyhow_mod::*;
 #[cfg(feature = "eyre")]
 pub use eyre_mod::*;
-use std::fmt::Display;
+#[cfg(not(any(feature = "ah", feature = "eyre")))]
+pub use std_mod::*;
